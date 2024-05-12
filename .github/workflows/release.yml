@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - '*'
+      - "v*"
 
 
 jobs:
@@ -19,15 +19,21 @@ jobs:
           
       - name: Build
         run: |
-          tar -czvf mini_fonts.tar.gz mini_fonts
-          ls -la mini_fonts.tar.gz  # 检查生成的压缩文件
-          
-      - name: List files in mini_fonts
-        run: ls -la mini_fonts
-      
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: mini_fonts.tar.gz
+          cd mini_fonts && tar -czvf ../mini_fonts.tar.gz *
+          ls -la ../mini_fonts.tar.gz  # 检查生成的压缩文件
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          files: ../mini_fonts.tar.gz  # 调整文件路径
+          body: |
+            Changes in this Release
+            - First Change
+            - Second Change
+          draft: false
+          prerelease: false
