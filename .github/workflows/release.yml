@@ -30,7 +30,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
           files: ../mini_fonts.tar.gz  # 调整文件路径
           body: |
             Changes in this Release
