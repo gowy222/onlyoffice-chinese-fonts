@@ -1,9 +1,12 @@
 name: Bump version and Release
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag Name'  # 添加一个标签名输入字段
+        required: true
+        default: 'v1.0.0'  # 可以提供一个默认值
 
 
 jobs:
