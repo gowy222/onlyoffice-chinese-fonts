@@ -2,6 +2,10 @@ name: Bump version and Release
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
 
 jobs:
   build:
@@ -9,13 +13,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
-      - name: Build
-        run: tar -czvf mini_fonts.tar.gz mini_fonts
 
+      - name: List current directory
+        run: ls -la
+          
+      - name: Build
+        run: |
+          tar -czvf mini_fonts.tar.gz mini_fonts
+          ls -la mini_fonts.tar.gz  # 检查生成的压缩文件
+          
+      - name: List files in mini_fonts
+        run: ls -la mini_fonts
+      
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: mini_fonts.tar.gz
         env:
