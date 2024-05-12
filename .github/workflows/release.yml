@@ -1,66 +1,26 @@
-name: Release Mini Fonts with auto-increment version
+name: Bump version and Release
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
 
 jobs:
-  build-and-release:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          python-version: '3.x'
-
-      - name: Install PyGitHub
-        run: |
-          python -m pip install PyGitHub
-
-      - name: Determine next version
-        id: next_version
-        run: |
-          from github import Github
-          import os
-
-          g = Github(os.getenv('GITHUB_TOKEN'))
-          repo = g.get_repo(os.getenv('GITHUB_REPOSITORY'))
-          tags = sorted([tag.name for tag in repo.get_tags()], reverse=True)
-          latest_tag = tags[0] if tags else 'v0.0.0'
-
-          # Increment the patch version
-          major, minor, patch = map(int, latest_tag.strip('v').split('.'))
-          next_version = f"v{major}.{minor}.{patch + 1}"
-
-          print(f"::set-output name=version::{next_version}")
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          fetch-depth: '0'  # 确保获取全部 git 历史
 
       - name: Compress mini_fonts folder
         run: tar -czvf mini_fonts.tar.gz mini_fonts
 
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v2.0.5
+        with:
+          files: mini_fonts.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.next_version.outputs.version }}
-          release_name: Release ${{ steps.next_version.outputs.version }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./mini_fonts.tar.gz
-          asset_name: mini_fonts.tar.gz
-          asset_content_type: application/gzip
