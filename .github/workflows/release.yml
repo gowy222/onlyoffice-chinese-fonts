@@ -1,7 +1,6 @@
 name: Bump version and Release
 
 on:
-  workflow_dispatch:
   push:
     tags:
       - "v*"
